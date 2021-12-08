@@ -5,6 +5,7 @@
 #include <sstream>
 #include <vector>
 #include <cassert>
+#include <span>
 
 using ll = signed long long;
 
@@ -14,10 +15,7 @@ struct display {
 };
 
 bool containsChar(const std::string& str, char& c) {
-    for (size_t i = 0; i < str.length(); ++i)
-        if (str[i] == c)
-            return true;
-    return false;
+    return str.find(c, 0) != std::string::npos;
 }
 
 std::string diff(std::string a, std::string& b) {
@@ -31,11 +29,6 @@ ll calcSum(display& d) {
     std::sort(d.patterns.begin(), d.patterns.end(), [](const auto& a, const auto& b) {
         return a.length() < b.length();
     });
-
-    for (auto& p : d.patterns) {
-        std::cout << p << " ";
-    }
-    std::cout << std::endl;
 
     std::array<char, 7> aM = {};
     std::vector<std::string> fiveLongValues = { d.patterns[3], d.patterns[4], d.patterns[5] };
@@ -66,34 +59,27 @@ ll calcSum(display& d) {
                 if (!containsChar(one, c) && c != aM[0] && c != aM[1] && c != aM[3])
                     aM[6] = c;
 
-    for (auto& f : fiveLongValues)
-        if (containsChar(f, aM[0]) && containsChar(f, aM[1]) && containsChar(f, aM[3]) && containsChar(f, aM[6]))
-            for (auto& c : f)
-                if (c != aM[0] && c != aM[1] && c != aM[3] && c != aM[6])
-                    aM[5] = c;
+    for (auto& f : fiveLongValues) {
+        std::string m = { aM[0], aM[1], aM[3], aM[6] };
+        auto dif = diff(f, m);
+        if (dif.length() == 1)
+            aM[5] = dif.front();
+    }
 
     aM[2] = one[(one[0] == aM[5])];
 
-    std::string map = { aM[0], aM[1], aM[2], aM[3], aM[5], aM[6] };
+    auto map = std::string { aM[0], aM[1], aM[2], aM[3], aM[5], aM[6] };
     aM[4] = diff(eight, map).front();
 
-    std::string output = {};
+    std::array<std::string, 10> digits = { "abcefg", "cf", "acdeg", "acdfg", "bcdf", "abdfg", "abdefg", "acf", "abcdefg", "abcdfg" };
+    ll out = 0;
     for (auto& o : d.out) {
-        if (o.length() == 2) output.push_back('1');
-        else if (o.length() == 3) output.push_back('7');
-        else if (o.length() == 4) output.push_back('4');
-        else if (o.length() == 7) output.push_back('8');
-        else if (o.length() == 5) {
-            if (!containsChar(o, aM[1]) && !containsChar(o, aM[4])) output.push_back('3');
-            else if (containsChar(o, aM[2])) output.push_back('2');
-            else output.push_back('5');
-        } else if (o.length() == 6) {
-            if (!containsChar(o, aM[3])) output.push_back('0');
-            else if (containsChar(o, aM[2])) output.push_back('9');
-            else output.push_back('6');
-        }
+        for (auto& c : o)
+            c = (std::find(aM.begin(), aM.end(), c) - aM.begin()) + 'a';
+        std::sort(o.begin(), o.end());
+        out = (out * 10) + (std::find(digits.begin(), digits.end(), o) - digits.begin());
     }
-    return std::stoi(output);
+    return out;
 }
 
 int main() {
