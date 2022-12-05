@@ -1,3 +1,6 @@
 *.out
 *.exe
 *.txt
+*.obj
+*.ilk
+*.pdb
