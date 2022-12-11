@@ -13,6 +13,8 @@ struct Monkey {
     uint64_t inspections;
 };
 
+constexpr bool partTwo = true;
+
 int main() {
     std::ifstream file("monkeys.txt");
     std::vector<Monkey> monkeys = {};
@@ -46,7 +48,14 @@ int main() {
         }
     }
 
-    constexpr size_t rounds = 20;
+    size_t lcm = 1;
+    if constexpr (partTwo) {
+        for (const auto& monkey: monkeys) {
+            lcm *= monkey.testDivisible;
+        }
+    }
+
+    constexpr size_t rounds = partTwo ? 10'000 : 20;
     for (size_t r = 0; r < rounds; ++r) {
         for (auto& monkey : monkeys) {
             for (auto& item : monkey.items) {
@@ -60,7 +69,7 @@ int main() {
                     item = ((left == "old") ? item : std::stoll(left)) + ((right == "old") ? item : std::stoll(right));
                 }
 
-                item = std::floor(item / 3);
+                item = (item / (partTwo ? 1 : 3)) % lcm;
                 if (item % monkey.testDivisible == 0) {
                     monkeys[monkey.monkeyTrue].items.emplace_back(item);
                 } else {
