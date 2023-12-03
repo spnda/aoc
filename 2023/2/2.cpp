@@ -15,12 +15,7 @@ int main() {
 	while (std::getline(file, ln)) {
 		std::string_view game = std::string_view(ln).substr(ln.find(':') + 2); // Skip the colon and space
 
-		std::unordered_map<std::string, std::size_t> maxValues = {{
-			{"blue", 0},
-			{"red", 0},
-			{"green", 0},
-		}};
-
+		std::size_t maxred = 0, maxgreen = 0, maxblue = 0;
 		bool possible = true;
 		std::size_t pos = 0;
 		while (pos < game.size()) {
@@ -33,15 +28,16 @@ int main() {
 			std::from_chars(&game[pos], &game[space], count);
 
 			auto color = std::string(game.substr(space + 1, delim - space - 1));
-			if (color == "blue" && count > blue) {
-				possible = false;
-			} else if (color == "red" && count > red) {
-				possible = false;
-			} else if (color == "green" && count > green) {
-				possible = false;
+			if (color == "blue") {
+				if (count > blue) possible = false;
+				if (maxblue < count) maxblue = count;
+			} else if (color == "red") {
+				if (count > red) possible = false;
+				if (maxred < count) maxred = count;
+			} else if (color == "green") {
+				if (count > green) possible = false;
+				if (maxgreen < count) maxgreen = count;
 			}
-			if (maxValues[color] < count)
-				maxValues[color] = count;
 
 			if (delim == std::string::npos)
 				break;
@@ -52,7 +48,7 @@ int main() {
 		if (possible) {
 			sum += gameId;
 		}
-		sum2 += maxValues["blue"] * maxValues["red"] * maxValues["green"];
+		sum2 += maxblue * maxred * maxgreen;
 	}
 	std::cout << sum << '\n';
 	std::cout << sum2;
